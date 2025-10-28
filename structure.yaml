@@ -1,0 +1,423 @@
+sistema: "Mercearia Web-App"
+objetivo: "Controle completo de mercadorias, preços, estoque, compras, vendas PDV, financeiro simples e relatórios"
+publico_alvo: "Pequenas mercearias com 1 a 3 caixas"
+pilares:
+  - velocidade_no_pdv
+  - estoque_confiavel
+  - precificacao_clara
+  - simplicidade_operacional
+  - auditoria_e_seguranca
+
+stack:
+  frontend:
+    tecnologia: "HTML + CSS puro + JS mínimo"
+    motor_template: "Jinja2"
+    PWA: false
+    acessibilidade: "atalhos no PDV, foco em teclado"
+  backend:
+    framework: "Flask"
+    orm: "SQLAlchemy"
+    migrations: "Flask-Migrate"
+    auth: "Flask-Login com sessões seguras"
+    validação: "WTForms ou validação no service layer"
+  armazenamento:
+    banco: "PostgreSQL ou SQLite local para dev"
+    arquivos: "pasta local static/uploads com possibilidade S3 futuramente"
+  tarefas_assincronas:
+    habilitado: false
+    opcional: "Celery + Redis"
+  observabilidade:
+    logs: "arquivo rotativo e console"
+    monitoramento: "healthcheck em /health"
+  email:
+    provider: "Flask-Mail via SMTP"
+
+configuracao:
+  env_vars:
+    SECRET_KEY: "segredo"
+    DATABASE_URL: "sqlite:///mercearia.db"
+    MAIL_SERVER: "smtp.seu-provedor.com"
+    MAIL_PORT: 587
+    MAIL_USE_TLS: true
+    MAIL_USERNAME: "usuario"
+    MAIL_PASSWORD: "senha"
+    ADMIN_EMAIL: "admin@local"
+    ADMIN_PASS: "trocar"
+  flags:
+    ENABLE_FISCAL: false
+    ENABLE_CELERY: false
+    READ_ONLY_MODE: false
+
+arquitetura_pastas:
+  raiz: "mercearia/"
+  arvore:
+    - .env
+    - requirements.txt
+    - README.md
+    - wsgi.py
+    - config.py
+    - manage.py
+    - migrations/
+    - app/
+      - __init__.py
+      - extensions.py
+      - auth/
+        - __init__.py
+        - routes.py
+      - core/
+        - __init__.py
+        - models.py
+        - services.py
+        - forms.py
+        - repository.py
+        - utils.py
+      - views/
+        - __init__.py
+        - dashboard.py
+        - products.py
+        - purchases.py
+        - stock.py
+        - pricing.py
+        - pos.py
+        - reports.py
+        - finance.py
+        - customers.py
+        - suppliers.py
+      - templates/
+        - base.html
+        - _nav.html
+        - _flash.html
+        - dashboard.html
+        - auth_login.html
+        - products_list.html
+        - product_form.html
+        - purchases_list.html
+        - purchase_form.html
+        - stock_moves.html
+        - inventory.html
+        - pricing.html
+        - pos.html
+        - reports_sales.html
+        - reports_inventory.html
+        - finance_cashflow.html
+        - customers_list.html
+        - customer_form.html
+        - suppliers_list.html
+        - supplier_form.html
+      - static/
+        - css/app.css
+        - js/pos.js
+        - uploads/.gitkeep
+
+dominio_de_negocio:
+  entidades:
+    Store:
+      campos: [id, nome, cnpj, ie, uf, cidade, timezone, ativo, criado_em]
+    User:
+      campos: [id, store_id, nome, email, hash, role, ativo, ultimo_login, criado_em]
+      roles: [admin, gerente, estoquista, operador]
+    Category:
+      campos: [id, store_id, nome, markup_padrao, ativo]
+    Product:
+      campos:
+        - id
+        - store_id
+        - sku
+        - ean
+        - nome
+        - categoria_id
+        - unidade  # UN, KG, L
+        - ncm
+        - cest
+        - custo_atual
+        - preco_venda
+        - margem_alvo
+        - estoque_minimo
+        - ponto_pedido
+        - foto_url
+        - ativo
+        - criado_em
+    Supplier:
+      campos: [id, store_id, nome, cnpj, ie, contato, telefone, email, prazo_dias, ativo, criado_em]
+    Customer:
+      campos: [id, store_id, nome, cpf, telefone, email, pontos, ativo, criado_em]
+    StockItem:
+      campos: [id, store_id, product_id, quantidade, reservado, atualizado_em]
+    StockMove:
+      campos: [id, store_id, product_id, tipo, qtd, custo, ref_origem, ref_id, motivo, user_id, criado_em]
+      tipos: [entrada_compra, entrada_ajuste, saida_venda, saida_ajuste, devolucao]
+    Purchase:
+      campos: [id, store_id, supplier_id, status, total_previsto, total_recebido, previsto_para, criado_em]
+      status: [rascunho, emitida, parcialmente_recebida, recebida, cancelada]
+    PurchaseItem:
+      campos: [id, purchase_id, product_id, qtd, custo, desconto, total]
+    PriceVersion:
+      campos: [id, store_id, product_id, preco, origem, valido_de, valido_ate, criado_em]
+      origem: [manual, regra_categoria, promocao]
+    Promo:
+      campos: [id, store_id, nome, regra_json, validade_ini, validade_fim, prioridade, ativa]
+      exemplos: ["desconto_percentual", "leve3_pague2", "combo"]
+    Sale:
+      campos: [id, store_id, caixa_id, customer_id, status, subtotal, desconto, total, pagamento, troco, fiscal_chave, criado_em, user_id]
+      status: [aberta, concluida, cancelada]
+      pagamento: [dinheiro, cartao, pix, misto]
+    SaleItem:
+      campos: [id, sale_id, product_id, qtd, preco_unit, desconto, promo_id, total]
+    Payable:
+      campos: [id, store_id, origem, ref_id, fornecedor_id, valor, vencimento, status, criado_em]
+      status: [aberto, pago, cancelado]
+    Receivable:
+      campos: [id, store_id, origem, ref_id, cliente_id, valor, vencimento, status, criado_em]
+    AuditLog:
+      campos: [id, store_id, entidade, entidade_id, acao, payload_json, user_id, ip, criado_em]
+
+regras_de_negocio:
+  estoque_nunca_negativo: true
+  custo_altera_por: [recebimento_compra, ajuste_autorizado]
+  cancelamento_venda_reverte_estoque: true
+  precos_versionados: true
+  promo_aplica_no_cliente_e_valida_no_servidor: true
+  permissoes_por_role:
+    admin: ["*"]
+    gerente: ["ler", "criar", "editar", "excluir", "preco", "inventario", "relatorios", "financeiro"]
+    estoquista: ["ler", "movimentar_estoque", "inventario", "compras"]
+    operador: ["abrir_venda", "concluir_venda", "cancelar_item", "consulta_preco"]
+  auditoria_obrigatoria_em: [ajuste_estoque, cancelamento_venda, alteracao_preco, inventario]
+
+fluxos_operacionais:
+  compra_e_entrada:
+    - disparo_por: ["ponto_de_pedido", "ruptura", "inventario"]
+    - gera: "Purchase rascunho"
+    - aprovacao: "Gerente"
+    - recebimento: "conferencia por EAN e quantidade"
+    - resultado: ["StockMove entrada_compra", "atualizacao custo medio", "Payable"]
+  formacao_preco:
+    - evento: "mudanca de custo ou regra de categoria"
+    - simulacao: "margem alvo e impostos basicos"
+    - publicacao: "PriceVersion por produto"
+  venda_pdv:
+    - iniciar: "abrir venda"
+    - adicionar_itens: "scanner EAN ou busca"
+    - aplicar_promos: "automatico"
+    - pagamento: "dinheiro/cartao/pix/misto"
+    - fiscal: "opcional NFC-e posterior"
+    - baixa_estoque: "saida_venda"
+    - recibo: "impressao simples"
+  inventario:
+    - criar_sessao: "por setor"
+    - contagem: "mobile ou estação com leitor"
+    - conciliacao: "diferença gera ajuste"
+    - auditoria: "motivo e aprovacao gerente"
+  devolucao:
+    - entrada: "com cupom ou nota"
+    - efeito: "movimento de retorno e estorno financeiro"
+
+rotas_http:
+  publicas:
+    - GET /health
+    - GET /auth/login
+    - POST /auth/login
+  autenticadas:
+    - GET /              # dashboard
+    - GET /logout
+    - GET /products
+    - GET /products/new
+    - POST /products
+    - GET /products/<id>/edit
+    - POST /products/<id>/update
+    - POST /products/<id>/delete
+    - GET /products/search?q=
+    - GET /stock/moves
+    - POST /stock/moves  # ajuste com motivo
+    - GET /purchases
+    - GET /purchases/new
+    - POST /purchases
+    - GET /purchases/<id>
+    - POST /purchases/<id>/submit
+    - POST /purchases/<id>/receive
+    - GET /pricing
+    - POST /pricing/publish
+    - GET /pos
+    - POST /pos/sale/open
+    - POST /pos/sale/<id>/add
+    - POST /pos/sale/<id>/remove
+    - POST /pos/sale/<id>/pay
+    - POST /pos/sale/<id>/cancel
+    - GET /reports/sales
+    - GET /reports/inventory
+    - GET /finance/cashflow
+    - GET /customers
+    - POST /customers
+    - GET /suppliers
+    - POST /suppliers
+
+templates_html:
+  base: "layout, toasts, csrf, barra superior com loja e usuário"
+  nav: "menu lateral por módulos e permissões"
+  telas:
+    dashboard: "vendas do dia, top itens, rupturas, alertas"
+    auth_login: "form de login"
+    products_list: "tabela, busca, paginação, botão novo"
+    product_form: "cadastro e edição"
+    purchases_list: "filtros por status"
+    purchase_form: "itens, fornecedor, resumo"
+    stock_moves: "kardex com filtros"
+    inventory: "sessões e diferenças"
+    pricing: "simulador e publicação"
+    pos: "layout caixa em tela cheia, leitor EAN, total, pagamento"
+    reports_sales: "gráficos simples e CSV"
+    reports_inventory: "giro, cobertura, ruptura"
+    finance_cashflow: "entradas, saídas, previsão"
+    customers_list: "CRUD simples"
+    suppliers_list: "CRUD simples"
+
+servicos_backend:
+  autenticacao:
+    login: "valida credenciais, cria sessão Flask-Login"
+    autorizacao: "decorators por role"
+  produtos:
+    criar_editar: "normaliza EAN, calcula margem"
+    busca: "por EAN, SKU e nome"
+  estoque:
+    movimentar: "transacional, nunca negativo"
+    kardex: "listagem paginada"
+  compras:
+    criar_pedido: "status rascunho"
+    receber: "gera entradas e atualiza custos"
+  precificacao:
+    simular: "markup sobre custo"
+    publicar: "salva PriceVersion"
+  vendas:
+    abrir: "Sale status aberta"
+    adicionar_item: "aplica promo"
+    pagar: "finaliza, baixa estoque"
+    cancelar: "reverte movimentos"
+  relatorios:
+    vendas: "por dia, operador, categoria"
+    estoque: "giro, cobertura, rupturas"
+  financeiro:
+    gerar_payables: "da compra"
+    gerar_receivables: "de vendas a prazo se houver"
+  auditoria:
+    registrar: "antes e depois em JSON"
+
+camada_repositorio:
+  padrao:
+    get_by_id: true
+    list_paginated: true
+    create: true
+    update: true
+    delete_soft: true
+
+validacoes:
+  produto:
+    ean: "13 ou 14 dígitos quando informado"
+    unidade: ["UN", "KG", "L"]
+    preco_nao_negativo: true
+  estoque:
+    bloqueio_negativo: true
+  compra:
+    fornecedor_obrigatorio: true
+    item_minimo: 1
+  venda:
+    item_minimo: 1
+    pagamento_obrigatorio_para_concluir: true
+
+seguranca:
+  csrf: "habilitado via Flask-WTF"
+  cookies:
+    samesite: Lax
+    secure: false
+  rate_limit: "pode ser adicionado com proxy"
+  mascaramento_dados:
+    logs: "não logar senhas, tokens, cartões"
+  lgpd:
+    clientes: "consentimento simples quando capturar contato"
+
+jobs_e_tarefas_opcionais:
+  - "reindexar_busca"
+  - "backup_diario_banco"
+  - "email_relatorio_vendas_diario"
+  - "expurgo_logs_antigos"
+
+relatorios_kpi:
+  vendas:
+    - faturamento_dia
+    - ticket_medio
+    - vendas_por_hora
+    - top10_produtos
+    - desempenho_operador
+  margem:
+    - margem_bruta_por_categoria
+    - curva_abc_produtos
+  estoque:
+    - giro_por_produto
+    - cobertura_em_dias
+    - ruptura_itens_sem_venda
+  financeiro:
+    - fluxo_caixa
+    - contas_a_pagar_e_receber
+
+testes:
+  unidade:
+    - services_produtos
+    - services_estoque
+    - services_vendas
+  integracao:
+    - rotas_basicas_com_login
+    - fluxo_compra_recebimento
+    - fluxo_pdv_venda_cancelamento
+  e2e_manual:
+    - cadastro_produto
+    - compra_com_recebimento
+    - venda_no_pdv
+    - inventario_e_ajuste
+
+scripts_dev:
+  makefile_windows_powershell:
+    - setup: "python -m venv venv; .\\venv\\Scripts\\pip install -r requirements.txt"
+    - run: "flask --app wsgi run"
+    - db_init: "flask db init"
+    - db_migrate: "flask db migrate -m 'init'"
+    - db_upgrade: "flask db upgrade"
+  seeds:
+    - criar_admin: "usa ADMIN_EMAIL e ADMIN_PASS"
+    - categorias_comuns: ["Mercearia", "Bebidas", "Higiene", "Limpeza", "Hortifruti"]
+
+roadmap:
+  mvp:
+    - login_sessao
+    - dashboard_basico
+    - cadastro_produtos_categorias
+    - estoque_kardex
+    - compras_e_recebimento
+    - pdv_sem_fiscal
+    - relatorio_vendas_basico
+  v1:
+    - promocoes
+    - inventario_cego
+    - precificacao_em_massa
+    - relatorios_giro_e_cobertura
+  v2:
+    - fidelidade_pontos
+    - fiscal_nfce_sat_opcional
+    - exportacoes_planilha
+    - concilia_cartao_simplificada
+
+saida_tecnica_minima:
+  healthcheck: "/health retorna 200 e json ok:true"
+  status_build: "exibe versão do app e hash git se disponível"
+
+pronto_para_producao:
+  gunicorn: "wsgi:app"
+  reverse_proxy: "nginx"
+  ssl: "letsencrypt ou interno"
+  backup: "pg_dump diário, retenção 30 dias"
+  logs:
+    formato: "JSON opcional"
+    rotacao: "10 MB, 10 arquivos"
+
+observacoes:
+  - manter CSS leve e utilitario
+  - JS no PDV apenas para atalhos, scanner e totalizadores
+  - evitar dependencias desnecessarias
