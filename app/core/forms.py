@@ -10,8 +10,9 @@ from wtforms import (
     DateField
 )
 from wtforms.validators import (
-    DataRequired, Length, Email, Optional as Opt, NumberRange
+    DataRequired, Length, Email, Optional as Opt, NumberRange, ValidationError
 )
+import re
 # se quiser upload CSV simples no admin
 try:
     from flask_wtf.file import FileField, FileAllowed
@@ -122,21 +123,35 @@ class CategoryForm(FlaskForm):
 # ========================
 
 class ProductForm(FlaskForm):
-    nome = StringField("Nome", validators=[DataRequired(), Length(max=200)])
-    sku = StringField("SKU", validators=[Opt(), Length(max=60)])
-    ean = StringField("EAN", validators=[Opt(), Length(max=14)])
+    nome = StringField("Produto", validators=[DataRequired(), Length(max=200)])
+    sku = StringField("Código interno (opcional)", validators=[Opt(), Length(max=60)])
+    ean = StringField("Código de barras (opcional)", validators=[Opt(), Length(max=20)])
     categoria_id = SelectField("Categoria", coerce=_to_int_or_none, validators=[Opt()], default=None)
-    unidade = SelectField("Unidade", choices=[("UN","UN"), ("KG","KG"), ("L","L")], validators=[DataRequired()])
-    ncm = StringField("NCM", validators=[Opt(), Length(max=10)])
-    cest = StringField("CEST", validators=[Opt(), Length(max=10)])
-    custo_atual = DecimalField("Custo", places=2, rounding=None, validators=[Opt(), NumberRange(min=0)])
+    unidade = SelectField("Unidade de venda", choices=[("UN","Unidade"), ("KG","Quilo"), ("L","Litro")], validators=[DataRequired()])
+    ncm = StringField("NCM (opcional)", validators=[Opt(), Length(max=10)])
+    cest = StringField("CEST (opcional)", validators=[Opt(), Length(max=10)])
+    custo_atual = DecimalField("Preço de compra", places=2, rounding=None, validators=[Opt(), NumberRange(min=0)])
     preco_venda = DecimalField("Preço de venda", places=2, rounding=None, validators=[Opt(), NumberRange(min=0)])
-    margem_alvo = DecimalField("Margem alvo (%)", places=2, rounding=None, validators=[Opt(), NumberRange(min=0)])
-    estoque_minimo = DecimalField("Estoque mínimo", places=4, rounding=None, validators=[Opt(), NumberRange(min=0)])
-    ponto_pedido = DecimalField("Ponto de pedido", places=4, rounding=None, validators=[Opt(), NumberRange(min=0)])
-    foto_url = StringField("URL da foto", validators=[Opt(), Length(max=255)])
-    ativo = BooleanField("Ativo", default=True)
+    margem_alvo = DecimalField("Lucro desejado (%) (opcional)", places=2, rounding=None, validators=[Opt(), NumberRange(min=0)])
+    estoque_minimo = DecimalField("Avisar quando tiver menos que", places=4, rounding=None, validators=[Opt(), NumberRange(min=0)])
+    ponto_pedido = DecimalField("Repor quando chegar em", places=4, rounding=None, validators=[Opt(), NumberRange(min=0)])
+    foto_url = StringField("Foto (link)", validators=[Opt(), Length(max=255)])
+    ativo = BooleanField("Produto ativo", default=True)
     submit = SubmitField("Salvar")
+
+    def validate_ean(self, field):
+        txt = (field.data or "").strip()
+        if not txt:
+            return
+        digits = re.sub(r"\D+", "", txt)
+        if digits == "":
+            # se a pessoa digitou só letras/espaços, trate como vazio
+            field.data = ""
+            return
+        if len(digits) not in (8, 12, 13, 14):
+            raise ValidationError("Código de barras deve ter 8, 12, 13 ou 14 números.")
+        # normaliza para só dígitos
+        field.data = digits
 
 
 # ========================
