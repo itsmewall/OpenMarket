@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% block title %}PDV{% endblock %}
+{% block content %}
+<h1>PDV</h1>
+
+<section class="pdv">
+  <div class="pdv-left">
+    {% if not sale %}
+      <form method="post" action="{{ url_for('pos.sale_open') }}">
+        {{ form_open.hidden_tag() }}
+        <button class="btn primary" type="submit" id="btnOpen">Abrir venda [F2]</button>
+      </form>
+    {% else %}
+      <div class="sale-info">
+        <div>Venda #{{ sale.id }}</div>
+        <div class="muted">Status: {{ sale.status }}</div>
+      </div>
+
+      <form method="post" action="{{ url_for('pos.sale_add', sale_id=sale.id) }}" id="formAdd">
+        {{ form_add.hidden_tag() }}
+        {{ form_add.product_id(class="input") }}
+        {{ form_add.qtd(class="input", value="1") }}
+        <button class="btn" type="submit">Adicionar [Enter]</button>
+      </form>
+
+      <table class="table compact mt">
+        <thead><tr><th>Produto</th><th>Qtd</th><th>Unit</th><th>Desc</th><th>Total</th></tr></thead>
+        <tbody>
+        {% for it in sale.items %}
+          <tr>
+            <td>{{ it.product.nome }}</td>
+            <td>{{ "%.4f"|format(it.qtd) }}</td>
+            <td>R$ {{ "%.2f"|format(it.preco_unit) }}</td>
+            <td>R$ {{ "%.2f"|format(it.desconto) }}</td>
+            <td>R$ {{ "%.2f"|format(it.total) }}</td>
+          </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    {% endif %}
+  </div>
+
+  <div class="pdv-right">
+    <div class="totals">
+      <div class="muted">Subtotal</div>
+      <div class="kpi">R$ {{ "%.2f"|format(sale.subtotal if sale else 0) }}</div>
+      <div class="muted">Desconto</div>
+      <div class="kpi">R$ {{ "%.2f"|format(sale.desconto if sale else 0) }}</div>
+      <div class="muted strong">Total</div>
+      <div class="kpi strong">R$ {{ "%.2f"|format(sale.total if sale else 0) }}</div>
+    </div>
+
+    {% if sale %}
+    <form method="post" action="{{ url_for('pos.sale_pay', sale_id=sale.id) }}" class="mt">
+      {{ form_pay.hidden_tag() }}
+      {{ form_pay.pagamento(class="input") }}
+      {{ form_pay.valor_pago(class="input", value="0") }}
+      {{ form_pay.customer_id(class="input") }}
+      <button class="btn success" type="submit" id="btnPay">Pagar [F8]</button>
+    </form>
+
+    <form method="post" action="{{ url_for('pos.sale_cancel', sale_id=sale.id) }}" class="mt">
+      {{ form_cancel.hidden_tag() }}
+      {{ form_cancel.motivo(class="input", placeholder="Motivo") }}
+      <button class="btn danger" type="submit" id="btnCancel">Cancelar [F9]</button>
+    </form>
+    {% endif %}
+  </div>
+</section>
+
+<script src="{{ url_for('static', filename='js/pos.js') }}"></script>
+{% endblock %}

@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}Login{% endblock %}
+{% block content %}
+<h1>Entrar</h1>
+<form method="post" action="{{ url_for('auth.login_post') }}" class="form">
+  {{ form.hidden_tag() }}
+  <div class="field">
+    {{ form.email.label }} {{ form.email(class="input") }}
+    {% for e in form.email.errors %}<div class="err">{{ e }}</div>{% endfor %}
+  </div>
+  <div class="field">
+    {{ form.password.label }} {{ form.password(class="input") }}
+    {% for e in form.password.errors %}<div class="err">{{ e }}</div>{% endfor %}
+  </div>
+  <div class="field row">
+    <label>{{ form.remember() }} Manter conectado</label>
+  </div>
+  <button class="btn primary" type="submit">Entrar</button>
+</form>
+{% endblock %}

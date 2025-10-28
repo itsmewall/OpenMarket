@@ -1,0 +1,9 @@
+{% with msgs = get_flashed_messages(with_categories=true) %}
+  {% if msgs %}
+    <div class="flash-area">
+      {% for cat, msg in msgs %}
+        <div class="alert {{ cat|e }}">{{ msg }}</div>
+      {% endfor %}
+    </div>
+  {% endif %}
+{% endwith %}

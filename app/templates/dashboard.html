@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+<h1>Visão geral</h1>
+<section class="cards">
+  <div class="card">
+    <div class="card-title">Vendas - últimos 7 dias</div>
+    <div class="card-body">
+      {% if vendas %}
+        <table class="table">
+          <thead><tr><th>Dia</th><th>Total</th><th>Qtd</th></tr></thead>
+          <tbody>
+          {% for r in vendas %}
+            <tr><td>{{ r.dia }}</td><td>R$ {{ r.total }}</td><td>{{ r.qtd }}</td></tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      {% else %}
+        <div class="muted">Sem vendas no período</div>
+      {% endif %}
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">Fluxo de caixa</div>
+    <div class="card-body grid2">
+      <div><div class="muted">A receber</div><div class="kpi">R$ {{ caixa.a_receber }}</div></div>
+      <div><div class="muted">A pagar</div><div class="kpi danger">R$ {{ caixa.a_pagar }}</div></div>
+      <div><div class="muted">Saldo previsto</div><div class="kpi strong">R$ {{ caixa.saldo_previsto }}</div></div>
+    </div>
+  </div>
+</section>
+{% endblock %}

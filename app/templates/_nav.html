@@ -1,0 +1,12 @@
+<nav>
+  {% if current_user.is_authenticated %}
+  <a href="{{ url_for('dashboard.index') }}">Dashboard</a>
+  <div class="nav-group">Operação</div>
+  <a href="{{ url_for('pos.pos_home') }}">PDV</a>
+  <div class="nav-group">Cadastro</div>
+  <a href="{{ url_for('products.list_') }}">Produtos</a>
+  {% endif %}
+  {% if not current_user.is_authenticated %}
+  <a href="{{ url_for('auth.login') }}">Login</a>
+  {% endif %}
+</nav>

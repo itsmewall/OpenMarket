@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Produtos{% endblock %}
+{% block content %}
+<div class="header-row">
+  <h1>Produtos</h1>
+  <a class="btn primary" href="{{ url_for('products.new') }}">Novo</a>
+</div>
+
+<form class="row" method="get">
+  <input class="input" type="text" name="q" value="{{ q }}" placeholder="Buscar por nome">
+  <button class="btn" type="submit">Buscar</button>
+</form>
+
+<table class="table mt">
+  <thead>
+    <tr>
+      <th>Nome</th><th>EAN</th><th>Preço</th><th>Estoque</th><th></th>
+    </tr>
+  </thead>
+  <tbody>
+  {% for p in items %}
+    <tr>
+      <td>{{ p.nome }}</td>
+      <td class="muted">{{ p.ean or "-" }}</td>
+      <td>R$ {{ "%.2f"|format(p.preco_venda or 0) }}</td>
+      <td>{{ "%.4f"|format(p.stock_item.quantidade if p.stock_item else 0) }}</td>
+      <td><a class="btn small" href="{{ url_for('products.edit', pid=p.id) }}">Editar</a></td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>{% block title %}Mercearia{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}">
+</head>
+<body>
+<header class="topbar">
+  <div class="brand">Mercearia</div>
+  <nav class="usernav">
+    {% if current_user.is_authenticated %}
+      <span class="muted">{{ current_user.nome }}</span>
+      <a class="btn" href="{{ url_for('auth.logout') }}">Sair</a>
+    {% endif %}
+  </nav>
+</header>
+
+<div class="layout">
+  <aside class="sidenav">
+    {% include "_nav.html" %}
+  </aside>
+  <main class="content">
+    {% include "_flash.html" %}
+    {% block content %}{% endblock %}
+  </main>
+</div>
+</body>
+</html>

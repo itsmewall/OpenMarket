@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block title %}Produto{% endblock %}
+{% block content %}
+<h1>{{ 'Editar produto' if produto else 'Novo produto' }}</h1>
+<form class="form" method="post" action="{{ url_for('products.update', pid=produto.id) if produto else url_for('products.create') }}">
+  {{ form.hidden_tag() }}
+
+  <div class="grid2">
+    <div class="field">
+      {{ form.nome.label }} {{ form.nome(class="input") }}
+      {% for e in form.nome.errors %}<div class="err">{{ e }}</div>{% endfor %}
+    </div>
+    <div class="field">
+      {{ form.categoria_id.label }} {{ form.categoria_id(class="input") }}
+    </div>
+    <div class="field">
+      {{ form.sku.label }} {{ form.sku(class="input") }}
+    </div>
+    <div class="field">
+      {{ form.ean.label }} {{ form.ean(class="input") }}
+      {% for e in form.ean.errors %}<div class="err">{{ e }}</div>{% endfor %}
+    </div>
+    <div class="field">
+      {{ form.unidade.label }} {{ form.unidade(class="input") }}
+    </div>
+    <div class="field">
+      {{ form.preco_venda.label }} {{ form.preco_venda(class="input") }}
+    </div>
+    <div class="field">
+      {{ form.custo_atual.label }} {{ form.custo_atual(class="input") }}
+    </div>
+    <div class="field">
+      {{ form.estoque_minimo.label }} {{ form.estoque_minimo(class="input") }}
+    </div>
+    <div class="field">
+      {{ form.ponto_pedido.label }} {{ form.ponto_pedido(class="input") }}
+    </div>
+    <div class="field">
+      {{ form.foto_url.label }} {{ form.foto_url(class="input") }}
+    </div>
+    <div class="field row">
+      <label>{{ form.ativo() }} Ativo</label>
+    </div>
+  </div>
+
+  <div class="actions">
+    <button class="btn primary" type="submit">Salvar</button>
+    <a class="btn" href="{{ url_for('products.list_') }}">Voltar</a>
+  </div>
+</form>
+{% endblock %}
