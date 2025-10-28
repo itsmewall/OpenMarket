@@ -1,20 +1,70 @@
-{% extends "base.html" %}
-{% block title %}Login{% endblock %}
+{% extends "base_auth.html" %}
+{% block title %}Entrar{% endblock %}
+
+{% block head %}
+  <h1 class="auth-title">Entrar</h1>
+  <p class="auth-sub">Use seu e-mail e senha</p>
+  {% if store %}
+    <div class="org-hint" style="margin-top:12px">
+      <div class="org-line" style="display:flex; align-items:center; gap:10px;">
+        <div class="org-dot" style="width:10px;height:10px;border-radius:50%;background:linear-gradient(135deg,#69d0ff,#2ee6a6)"></div>
+        <div>
+          <div class="org-title" style="font-weight:800">{{ store.nome }}</div>
+          <div class="org-sub muted" style="font-size:12px">
+            {% if store.cidade %}{{ store.cidade }}{% endif %}{% if store.uf %} - {{ store.uf }}{% endif %}
+            {% if not store.cidade and not store.uf %}Empresa cadastrada{% endif %}
+          </div>
+        </div>
+      </div>
+      {% if user_count == 0 %}
+        <div style="margin-top:8px">
+          <a class="btn-auth primary" href="{{ url_for('setup.setup_admin') }}">Criar primeiro usuário</a>
+        </div>
+      {% endif %}
+    </div>
+  {% endif %}
+{% endblock %}
+
+{% block header_actions %}
+  {% if store_count == 0 %}
+    <a class="ghost-link" href="{{ url_for('setup.welcome') }}">Criar empresa</a>
+  {% elif user_count == 0 %}
+    <a class="ghost-link" href="{{ url_for('setup.setup_admin') }}">Criar primeiro usuário</a>
+  {% endif %}
+{% endblock %}
+
 {% block content %}
-<h1>Entrar</h1>
-<form method="post" action="{{ url_for('auth.login_post') }}" class="form">
+<form method="post" action="{{ url_for('auth.login_post') }}" class="auth-form" autocomplete="on">
   {{ form.hidden_tag() }}
-  <div class="field">
-    {{ form.email.label }} {{ form.email(class="input") }}
+
+  <div class="fgroup">
+    <label for="email">E-mail</label>
+    {{ form.email(class="input fx") }}
     {% for e in form.email.errors %}<div class="err">{{ e }}</div>{% endfor %}
   </div>
-  <div class="field">
-    {{ form.password.label }} {{ form.password(class="input") }}
+
+  <div class="fgroup">
+    <label for="password">Senha</label>
+    <div class="input-pass">
+      {{ form.password(class="input fx", id="password") }}
+      <button type="button" class="peek" onclick="const p=document.getElementById('password'); p.type = p.type==='password' ? 'text' : 'password'; this.classList.toggle('on');" aria-label="Mostrar senha"></button>
+    </div>
     {% for e in form.password.errors %}<div class="err">{{ e }}</div>{% endfor %}
   </div>
-  <div class="field row">
-    <label>{{ form.remember() }} Manter conectado</label>
+
+  <div class="row-between">
+    <label class="check-inline">{{ form.remember() }} <span>Manter conectado</span></label>
+    <a class="muted small" href="#" onclick="alert('Recuperação de senha será adicionada'); return false;">Esqueci a senha</a>
   </div>
-  <button class="btn primary" type="submit">Entrar</button>
+
+  <button class="btn-auth primary w100" type="submit">Acessar painel</button>
+
+  {% if store_count == 0 %}
+    <div class="or"><span>ou</span></div>
+    <a class="btn-auth ghost w100" href="{{ url_for('setup.welcome') }}">Criar empresa</a>
+  {% elif user_count == 0 %}
+    <div class="or"><span>ou</span></div>
+    <a class="btn-auth ghost w100" href="{{ url_for('setup.setup_admin') }}">Criar primeiro usuário</a>
+  {% endif %}
 </form>
 {% endblock %}

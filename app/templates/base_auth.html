@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>{% block title %}Acesso{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}">
+</head>
+<body class="auth-bg">
+  <div class="auth-aurora"></div>
+  <div class="auth-noise"></div>
+
+  <header class="auth-header">
+    <div class="auth-brand">
+      <div class="logo-dot"></div>
+      <span>OpenMarket</span>
+    </div>
+    <div class="auth-header-actions">
+      {% block header_actions %}{% endblock %}
+    </div>
+  </header>
+
+  <main class="auth-main">
+    <section class="auth-card">
+      <div class="auth-card-head">
+        {% block head %}
+        <h1 class="auth-title">Bem-vindo</h1>
+        <p class="auth-sub">Acesse sua conta ou crie sua empresa</p>
+        {% endblock %}
+      </div>
+      <div class="auth-card-body">
+        {% block content %}{% endblock %}
+      </div>
+      <footer class="auth-card-foot">
+        {% block foot %}{% endblock %}
+      </footer>
+    </section>
+  </main>
+
+  <footer class="auth-footer">
+    <div>© {{ 2025 }} OpenMarket</div>
+    <div class="muted">Feito para mercearias que levam controle a sério</div>
+  </footer>
+</body>
+</html>

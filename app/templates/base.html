@@ -3,12 +3,12 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>{% block title %}Mercearia{% endblock %}</title>
+  <title>{% block title %}OpenMarket{% endblock %}</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}">
 </head>
 <body>
 <header class="topbar">
-  <div class="brand">Mercearia</div>
+  <div class="brand">OpenMarket</div>
   <nav class="usernav">
     {% if current_user.is_authenticated %}
       <span class="muted">{{ current_user.nome }}</span>

@@ -1,7 +1,25 @@
-{% extends "base.html" %}
-{% block title %}Configurar sistema{% endblock %}
+{% extends "base_auth.html" %}
+{% block title %}Começar{% endblock %}
+{% block head %}
+  <h1 class="auth-title">Primeiro acesso</h1>
+  <p class="auth-sub">Vamos criar a sua empresa e o usuário administrador</p>
+{% endblock %}
 {% block content %}
-<h1>Bem-vindo</h1>
-<p>Vamos configurar sua empresa e o primeiro usuário administrador.</p>
-<a class="btn primary" href="{{ url_for('setup.setup_company') }}">Começar</a>
+<div class="steps">
+  <div class="step">
+    <div class="step-dot"></div>
+    <div>
+      <div class="step-title">Empresa</div>
+      <div class="step-sub">Razão, CNPJ, cidade, fuso</div>
+    </div>
+  </div>
+  <div class="step">
+    <div class="step-dot"></div>
+    <div>
+      <div class="step-title">Administrador</div>
+      <div class="step-sub">Nome, e-mail, senha segura</div>
+    </div>
+  </div>
+</div>
+<a class="btn-auth primary w100" href="{{ url_for('setup.setup_company') }}">Começar</a>
 {% endblock %}

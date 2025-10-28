@@ -1,18 +1,21 @@
-{% extends "base.html" %}
+{% extends "base_auth.html" %}
 {% block title %}Empresa{% endblock %}
+{% block head %}
+  <h1 class="auth-title">Dados da empresa</h1>
+  <p class="auth-sub">Informações essenciais para configurar o sistema</p>
+{% endblock %}
 {% block content %}
-<h1>Dados da empresa</h1>
-<form method="post" class="form">
+<form method="post" class="auth-form">
   {{ form.hidden_tag() }}
   <div class="grid2">
-    <div class="field">{{ form.nome.label }} {{ form.nome(class="input") }}</div>
-    <div class="field">{{ form.cnpj.label }} {{ form.cnpj(class="input") }}</div>
-    <div class="field">{{ form.ie.label }} {{ form.ie(class="input") }}</div>
-    <div class="field">{{ form.uf.label }} {{ form.uf(class="input") }}</div>
-    <div class="field">{{ form.cidade.label }} {{ form.cidade(class="input") }}</div>
-    <div class="field">{{ form.timezone.label }} {{ form.timezone(class="input") }}</div>
+    <div class="fgroup">{{ form.nome.label }} {{ form.nome(class="input fx") }}</div>
+    <div class="fgroup">{{ form.cnpj.label }} {{ form.cnpj(class="input fx") }}</div>
+    <div class="fgroup">{{ form.ie.label }} {{ form.ie(class="input fx") }}</div>
+    <div class="fgroup">{{ form.uf.label }} {{ form.uf(class="input fx", maxlength="2") }}</div>
+    <div class="fgroup">{{ form.cidade.label }} {{ form.cidade(class="input fx") }}</div>
+    <div class="fgroup">{{ form.timezone.label }} {{ form.timezone(class="input fx") }}</div>
   </div>
-  <div class="field row"><label>{{ form.ativo() }} Ativa</label></div>
-  <button class="btn primary" type="submit">Avançar</button>
+  <label class="check-inline">{{ form.ativo() }} <span>Empresa ativa</span></label>
+  <button class="btn-auth primary w100" type="submit">Avançar</button>
 </form>
 {% endblock %}

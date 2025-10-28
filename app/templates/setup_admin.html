@@ -1,16 +1,25 @@
-{% extends "base.html" %}
+{% extends "base_auth.html" %}
 {% block title %}Administrador{% endblock %}
+{% block head %}
+  <h1 class="auth-title">Administrador</h1>
+  <p class="auth-sub">Crie o primeiro usuário com perfil e senha</p>
+{% endblock %}
 {% block content %}
-<h1>Crie o administrador</h1>
-<form method="post" class="form">
+<form method="post" class="auth-form" autocomplete="off">
   {{ form.hidden_tag() }}
   <div class="grid2">
-    <div class="field">{{ form.nome.label }} {{ form.nome(class="input") }}</div>
-    <div class="field">{{ form.email.label }} {{ form.email(class="input") }}</div>
-    <div class="field">{{ form.role.label }} {{ form.role(class="input") }}</div>
-    <div class="field">{{ form.senha.label }} {{ form.senha(class="input") }}</div>
+    <div class="fgroup">{{ form.nome.label }} {{ form.nome(class="input fx") }}</div>
+    <div class="fgroup">{{ form.email.label }} {{ form.email(class="input fx") }}</div>
+    <div class="fgroup">{{ form.role.label }} {{ form.role(class="input fx") }}</div>
+    <div class="fgroup">
+      {{ form.senha.label }}
+      <div class="input-pass">
+        {{ form.senha(class="input fx", id="admin_pass") }}
+        <button type="button" class="peek" onclick="const p=document.getElementById('admin_pass'); p.type = p.type==='password' ? 'text' : 'password'; this.classList.toggle('on');" aria-label="Mostrar senha"></button>
+      </div>
+    </div>
   </div>
-  <div class="field row"><label>{{ form.ativo() }} Ativo</label></div>
-  <button class="btn primary" type="submit">Finalizar</button>
+  <label class="check-inline">{{ form.ativo() }} <span>Usuário ativo</span></label>
+  <button class="btn-auth primary w100" type="submit">Finalizar</button>
 </form>
 {% endblock %}

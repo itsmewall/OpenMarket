@@ -1,0 +1,174 @@
+/* Autenticação exclusiva: fundo, cartão e controles */
+:root{
+  --auth-bg1:#0b1220;
+  --auth-bg2:#101a2c;
+  --auth-aur1:#5acaff;
+  --auth-aur2:#7a5cff;
+  --auth-aur3:#2ee6a6;
+  --auth-card:rgba(255,255,255,0.06);
+  --auth-bd:rgba(255,255,255,0.14);
+  --auth-blur:12px;
+  --auth-shadow:0 10px 30px rgba(0,0,0,.35);
+  --auth-t:#eaf1f7;
+  --auth-mut:#9fb0c0;
+  --auth-primary:#69d0ff;
+  --auth-primary-2:#2378ff;
+  --auth-ok:#2fbf71;
+  --auth-err:#e05f5f;
+}
+
+.auth-bg{
+  min-height:100vh;
+  color:var(--auth-t);
+  background:
+    radial-gradient(1200px 800px at 20% -10%, #13233c 0%, transparent 60%),
+    radial-gradient(800px 600px at 120% 20%, #0c1a30 0%, transparent 50%),
+    linear-gradient(160deg, var(--auth-bg1), var(--auth-bg2));
+  position:relative;
+  overflow:hidden;
+}
+
+/* Aurora animada suave */
+.auth-aurora,
+.auth-aurora::before,
+.auth-aurora::after{
+  position:absolute; inset:-10%;
+  filter:blur(60px);
+  content:"";
+  pointer-events:none;
+  opacity:.38;
+  mix-blend-mode:screen;
+}
+.auth-aurora{
+  background:
+    radial-gradient(600px 400px at 20% 30%, var(--auth-aur1), transparent 60%),
+    radial-gradient(600px 400px at 70% 20%, var(--auth-aur2), transparent 60%),
+    radial-gradient(600px 400px at 60% 70%, var(--auth-aur3), transparent 60%);
+  animation: drift 24s ease-in-out infinite alternate;
+}
+.auth-aurora::before{
+  background:
+    radial-gradient(500px 300px at 80% 60%, var(--auth-aur2), transparent 60%),
+    radial-gradient(500px 300px at 30% 70%, var(--auth-aur1), transparent 60%);
+  animation: drift 30s ease-in-out infinite alternate-reverse;
+}
+.auth-aurora::after{
+  background:
+    radial-gradient(500px 300px at 40% 40%, var(--auth-aur3), transparent 60%);
+  animation: drift 28s ease-in-out infinite;
+}
+@keyframes drift{
+  0%{ transform: translate3d(-2%, -2%, 0) scale(1); }
+  100%{ transform: translate3d(2%, 2%, 0) scale(1.03); }
+}
+
+/* Grão sutil para textura */
+.auth-noise{
+  position:absolute; inset:0;
+  opacity:.06; pointer-events:none;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='140' height='140' viewBox='0 0 140 140'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix type='saturate' values='0'/></filter><rect width='140' height='140' filter='url(%23n)' opacity='.6'/></svg>");
+  background-size:140px 140px;
+  background-repeat:repeat;
+  mix-blend-mode:overlay;
+}
+
+/* Header minimalista */
+.auth-header{
+  height:64px; display:flex; align-items:center; justify-content:space-between;
+  padding:0 24px; position:relative; z-index:2;
+}
+.auth-brand{display:flex; align-items:center; gap:10px; font-weight:900; letter-spacing:.3px}
+.logo-dot{width:12px; height:12px; border-radius:50%; background:linear-gradient(135deg, var(--auth-primary), var(--auth-aur3)); box-shadow:0 0 0 3px rgba(105,208,255,.18)}
+.ghost-link{color:var(--auth-t); opacity:.9; border:1px solid var(--auth-bd); padding:8px 12px; border-radius:10px; background:rgba(255,255,255,.02)}
+.ghost-link:hover{background:rgba(255,255,255,.06)}
+
+/* Layout centralizado */
+.auth-main{
+  min-height:calc(100vh - 64px - 56px);
+  display:grid; place-items:center; padding:24px; position:relative; z-index:2;
+}
+.auth-card{
+  width:min(920px, 96vw);
+  background:linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.06));
+  border:1px solid var(--auth-bd);
+  border-radius:18px;
+  backdrop-filter: blur(var(--auth-blur));
+  box-shadow: var(--auth-shadow);
+  overflow:hidden;
+}
+.auth-card-head{padding:28px 28px 12px}
+.auth-card-body{padding:0 28px 24px}
+.auth-card-foot{padding:0 28px 28px}
+
+/* Títulos */
+.auth-title{margin:0 0 6px; font-weight:900; font-size:26px; letter-spacing:.2px}
+.auth-sub{margin:0; color:var(--auth-mut)}
+
+/* Form base */
+.auth-form{display:grid; gap:14px}
+.grid2{display:grid; grid-template-columns:1fr 1fr; gap:12px}
+@media (max-width:740px){ .grid2{grid-template-columns:1fr} }
+
+.fgroup label{display:block; margin:0 0 6px; color:var(--auth-mut); font-size:13px}
+.input{
+  width:100%; padding:12px 14px; color:var(--auth-t);
+  background:rgba(8,12,18,.65); border:1px solid var(--auth-bd); border-radius:12px;
+  outline:none; transition: border .2s, background .2s, box-shadow .2s;
+}
+.input.fx:focus{
+  border-color:rgba(121,208,255,.8);
+  box-shadow:0 0 0 3px rgba(121,208,255,.18);
+  background:rgba(12,16,24,.75);
+}
+.input-pass{position:relative}
+.input-pass .peek{
+  position:absolute; right:8px; top:50%; transform:translateY(-50%);
+  width:34px; height:34px; border-radius:10px; border:1px solid var(--auth-bd);
+  background:linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.05));
+  cursor:pointer;
+}
+.input-pass .peek::before{
+  content:""; display:block; width:18px; height:18px; margin:7px auto;
+  background:
+    radial-gradient(circle at 50% 50%, var(--auth-t) 28%, transparent 29%),
+    radial-gradient(80% 60% at 50% 50%, transparent 49%, var(--auth-t) 50% 52%, transparent 53%);
+  opacity:.75;
+}
+.input-pass .peek.on::before{ filter:grayscale(1); opacity:.5 }
+
+.row-between{display:flex; align-items:center; justify-content:space-between; gap:16px}
+.check-inline{display:flex; align-items:center; gap:8px; cursor:pointer}
+.small{font-size:12px}
+
+.btn-auth{
+  padding:12px 14px; border-radius:12px; border:1px solid var(--auth-bd);
+  background:rgba(255,255,255,.04); color:var(--auth-t); cursor:pointer;
+  transition:transform .06s ease, filter .2s, background .2s, border .2s;
+  text-align:center; font-weight:700;
+}
+.btn-auth:hover{filter:brightness(1.08)}
+.btn-auth:active{transform:translateY(1px)}
+.btn-auth.primary{
+  background:linear-gradient(180deg, rgba(121,208,255,.20), rgba(121,208,255,.08));
+  border-color:rgba(121,208,255,.45);
+  box-shadow:inset 0 0 0 1px rgba(121,208,255,.25);
+}
+.btn-auth.ghost{background:rgba(255,255,255,.02)}
+.w100{width:100%}
+
+.or{display:grid; grid-template-columns:1fr auto 1fr; align-items:center; gap:10px; margin:6px 0}
+.or::before,.or::after{content:""; height:1px; background:linear-gradient(90deg, transparent, rgba(255,255,255,.22), transparent)}
+
+.steps{display:grid; gap:12px; margin-bottom:14px}
+.step{display:flex; gap:12px; align-items:flex-start; background:rgba(255,255,255,.03); border:1px solid var(--auth-bd); border-radius:12px; padding:10px 12px}
+.step-dot{width:10px; height:10px; border-radius:50%; margin-top:5px; background:linear-gradient(135deg, var(--auth-aur3), var(--auth-primary))}
+.step-title{font-weight:800}
+.step-sub{color:var(--auth-mut); font-size:12px}
+
+.err{margin-top:6px; color:#ffd4d4; font-size:12px}
+
+/* Rodapé */
+.auth-footer{
+  height:56px; display:flex; align-items:center; justify-content:space-between;
+  padding:0 24px; color:var(--auth-mut); position:relative; z-index:2;
+}
