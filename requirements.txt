@@ -1,49 +1,10 @@
-# Núcleo Flask
-flask
-flask_sqlalchemy
-flask_migrate
-flask_login
-flask_wtf
-flask_mail
-flask_cors
-
-# Banco de dados
-psycopg2-binary
-sqlite3  # apenas se for ambiente local
-
-# Utilitários
+Flask
+Flask-SQLAlchemy
+Flask-Migrate
+Flask-Login
+Flask-WTF
+Flask-Cors
 python-dotenv
-passlib[bcrypt]
 email-validator
 requests
-pandas
-openpyxl
-xlrd
-
-# PDF / relatórios
-reportlab
-weasyprint
-jinja2
-
-# Segurança
-itsdangerous
-cryptography
-
-# Upload e imagens
-pillow
-
-# Ferramentas de background / jobs (opcional, para notificações)
-celery
-redis
-
-# Testes e debug
-pytest
-pytest-flask
-flake8
-
-# CLI e admin opcional
-flask-admin
-
-# Internacionalização e formatação
-babel
-python-dateutil
+Pillow

@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}Empresa{% endblock %}
+{% block content %}
+<h1>Dados da empresa</h1>
+<form method="post" class="form">
+  {{ form.hidden_tag() }}
+  <div class="grid2">
+    <div class="field">{{ form.nome.label }} {{ form.nome(class="input") }}</div>
+    <div class="field">{{ form.cnpj.label }} {{ form.cnpj(class="input") }}</div>
+    <div class="field">{{ form.ie.label }} {{ form.ie(class="input") }}</div>
+    <div class="field">{{ form.uf.label }} {{ form.uf(class="input") }}</div>
+    <div class="field">{{ form.cidade.label }} {{ form.cidade(class="input") }}</div>
+    <div class="field">{{ form.timezone.label }} {{ form.timezone(class="input") }}</div>
+  </div>
+  <div class="field row"><label>{{ form.ativo() }} Ativa</label></div>
+  <button class="btn primary" type="submit">Avançar</button>
+</form>
+{% endblock %}

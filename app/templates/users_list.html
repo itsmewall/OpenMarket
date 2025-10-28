@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}Usuários{% endblock %}
+{% block content %}
+<div class="header-row">
+  <h1>Usuários</h1>
+  <a class="btn primary" href="{{ url_for('users.new') }}">Novo</a>
+</div>
+<form class="row" method="get">
+  <input class="input" name="q" value="{{ q }}" placeholder="Buscar por nome ou e-mail">
+  <button class="btn" type="submit">Buscar</button>
+</form>
+<table class="table mt">
+  <thead><tr><th>Nome</th><th>E-mail</th><th>Perfil</th><th>Status</th><th></th></tr></thead>
+  <tbody>
+  {% for u in items %}
+    <tr>
+      <td>{{ u.nome }}</td>
+      <td class="muted">{{ u.email }}</td>
+      <td>{{ u.role }}</td>
+      <td>{{ 'Ativo' if u.ativo else 'Inativo' }}</td>
+      <td class="row">
+        <a class="btn small" href="{{ url_for('users.edit', uid=u.id) }}">Editar</a>
+        <form method="post" action="{{ url_for('users.toggle', uid=u.id) }}">
+          <button class="btn small" type="submit">{{ 'Desativar' if u.ativo else 'Ativar' }}</button>
+        </form>
+      </td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

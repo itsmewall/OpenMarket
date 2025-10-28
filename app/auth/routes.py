@@ -3,7 +3,6 @@ from __future__ import annotations
 
 from flask import Blueprint, render_template, redirect, request, url_for, flash
 from flask_login import login_user, logout_user, login_required, current_user
-from werkzeug.security import safe_str_cmp
 
 from app.core.forms import LoginForm
 from app.core.models import User
@@ -31,8 +30,8 @@ def login_post():
 
     login_user(user, remember=form.remember.data)
     flash("Bem-vindo", "success")
-    next_url = request.args.get("next") or url_for("dashboard.index")
-    return redirect(next_url)
+    nxt = request.args.get("next") or url_for("dashboard.index")
+    return redirect(nxt)
 
 @bp.get("/logout")
 @login_required

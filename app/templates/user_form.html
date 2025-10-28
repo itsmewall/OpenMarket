@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Editar usuário' if user else 'Novo usuário' }}{% endblock %}
+{% block content %}
+<h1>{{ 'Editar usuário' if user else 'Novo usuário' }}</h1>
+<form method="post" class="form">
+  {{ form.hidden_tag() }}
+  <div class="grid2">
+    <div class="field">{{ form.nome.label }} {{ form.nome(class="input") }}</div>
+    <div class="field">{{ form.email.label }} {{ form.email(class="input") }}</div>
+    <div class="field">{{ form.role.label }} {{ form.role(class="input") }}</div>
+    {% if user %}
+      <div class="field">{{ form.nova_senha.label }} {{ form.nova_senha(class="input") }}</div>
+    {% else %}
+      <div class="field">{{ form.senha.label }} {{ form.senha(class="input") }}</div>
+    {% endif %}
+  </div>
+  <div class="field row"><label>{{ form.ativo() }} Ativo</label></div>
+  <button class="btn primary" type="submit">Salvar</button>
+  <a class="btn" href="{{ url_for('users.list_') }}">Voltar</a>
+</form>
+{% endblock %}

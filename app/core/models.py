@@ -3,21 +3,18 @@ from __future__ import annotations
 
 import os
 import re
-from datetime import datetime, timedelta
+from datetime import datetime
 from decimal import Decimal, ROUND_HALF_UP
 from typing import Optional
 
-from flask import current_app
-from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import (
-    CheckConstraint, Column, Integer, BigInteger, String, Text, DateTime,
+    CheckConstraint, Column, Integer, BigInteger, String, DateTime,
     Boolean, ForeignKey, UniqueConstraint, Numeric, Enum, JSON, Index, event,
-    func, DDL
+    func
 )
 from sqlalchemy.orm import relationship, backref, validates
-from passlib.hash import bcrypt
+from werkzeug.security import generate_password_hash as _wzh, check_password_hash as _wzc
 
-# Instanciado em app/extensions.py. Aqui importamos a referência.
 from app.extensions import db  # type: ignore
 
 
@@ -25,8 +22,8 @@ from app.extensions import db  # type: ignore
 # Utilidades e Mixins
 # =============================================================================
 
-MONEY = Numeric(12, 2)  # 999.999.999,99 máx
-QTD = Numeric(14, 4)    # quantidades com 4 casas
+MONEY = Numeric(12, 2)   # 999.999.999,99 máx
+QTD = Numeric(14, 4)     # quantidades com 4 casas
 
 def _as_money(value) -> Decimal:
     if value is None:
@@ -115,11 +112,12 @@ class User(db.Model, TimestampMixin, SoftDeleteMixin, StoreScopedMixin):
     def set_password(self, raw: str):
         if not raw or len(raw) < 6:
             raise ValueError("Senha muito curta")
-        self._password_hash = bcrypt.hash(raw)
+        # PBKDF2 do Werkzeug evita dependência de bcrypt
+        self._password_hash = _wzh(raw, method="pbkdf2:sha256", salt_length=16)
 
     def check_password(self, raw: str) -> bool:
         try:
-            return bcrypt.verify(raw, self._password_hash)
+            return _wzc(self._password_hash, raw)
         except Exception:
             return False
 
@@ -179,7 +177,7 @@ class Product(db.Model, TimestampMixin, SoftDeleteMixin, StoreScopedMixin, Audit
     @validates("ean")
     def _val_ean(self, key, value):
         v = normalize_ean(value)
-        if v and len(v) not in (8, 12, 13, 14):  # aceitando EAN-8, UPC-A, EAN-13, DUN-14
+        if v and len(v) not in (8, 12, 13, 14):  # EAN8, UPC-A, EAN13, DUN-14
             raise ValueError("EAN inválido")
         return v
 
@@ -258,7 +256,7 @@ class StockMove(db.Model, TimestampMixin, StoreScopedMixin, AuditMixin):
     tipo = Column(StockMoveEnum, nullable=False, index=True)
     qtd = Column(QTD, nullable=False)
     custo = Column(MONEY, nullable=False, default=Decimal("0.00"))
-    ref_origem = Column(String(30), nullable=True)  # "purchase", "sale", etc
+    ref_origem = Column(String(30), nullable=True)  # "purchase", "sale" etc
     ref_id = Column(Integer, nullable=True)
     motivo = Column(String(200), nullable=True)
 
@@ -504,20 +502,16 @@ class AuditLog(db.Model, TimestampMixin, StoreScopedMixin):
 
 
 # =============================================================================
-# Índices e compatibilidade com Postgres e SQLite
+# Índices
 # =============================================================================
 
-# Index funcional por nome em lower para busca case-insensitive
-# Para SQLite, o Index com func.lower funciona. Para Postgres, também.
 Index("ix_products_nome_lower", func.lower(Product.nome))
 Index("ix_suppliers_nome_lower", func.lower(Supplier.nome))
 Index("ix_customers_nome_lower", func.lower(Customer.nome))
 
-# Em Postgres, um índice GIN para busca textual seria melhor. Mantemos simples aqui.
-
 
 # =============================================================================
-# Regras defensivas de estoque e movimentos
+# Regras de estoque
 # =============================================================================
 
 def _apply_stock_move(mapper, connection, target: StockMove):
@@ -533,7 +527,6 @@ def _apply_stock_move(mapper, connection, target: StockMove):
     if stock_items:
         si = stock_items[0]
     else:
-        # cria registro de estoque com zero caso não exista
         si = StockItem(store_id=target.store_id, product_id=target.product_id, quantidade=Decimal("0.0000"))
         db.session.add(si)
         db.session.flush()
@@ -554,7 +547,7 @@ def _apply_stock_move(mapper, connection, target: StockMove):
     if target.tipo == "entrada_compra":
         prod = db.session.get(Product, target.product_id)
         if prod:
-            # custo médio simples: Cm = (Qt*Cm + q*c) / (Qt + q)
+            # Cm = (Qt*Cm + q*c) / (Qt + q)
             Qt = _as_qtd(si.quantidade)
             q = qtd
             if Qt > 0:
@@ -564,7 +557,6 @@ def _apply_stock_move(mapper, connection, target: StockMove):
                 prod.custo_atual = _as_money(Cm_new)
             else:
                 prod.custo_atual = _as_money(target.custo)
-
 
 event.listen(StockMove, "after_insert", _apply_stock_move)
 
@@ -576,8 +568,7 @@ event.listen(StockMove, "after_insert", _apply_stock_move)
 def ensure_admin():
     """
     Cria loja padrão e admin, se não existirem.
-    Usa variáveis de ambiente:
-    ADMIN_EMAIL, ADMIN_PASS
+    Usa variáveis de ambiente ADMIN_EMAIL e ADMIN_PASS.
     """
     admin_email = os.getenv("ADMIN_EMAIL", "admin@local").lower()
     admin_pass = os.getenv("ADMIN_PASS", "admin123")
@@ -601,42 +592,3 @@ def ensure_admin():
         db.session.add(user)
 
     db.session.commit()
-
-
-# =============================================================================
-# Validações adicionais via @validates
-# =============================================================================
-
-@validates(Product.preco_venda)
-def _val_product_preco(key, value):
-    v = _as_money(value)
-    if v < 0:
-        raise ValueError("Preço negativo")
-    return v
-
-@validates(Product.custo_atual)
-def _val_product_custo(key, value):
-    v = _as_money(value)
-    if v < 0:
-        raise ValueError("Custo negativo")
-    return v
-
-
-# =============================================================================
-# Dicas de migração para SQLite
-# =============================================================================
-# Em SQLite, ativar FK:
-# event.listen(db.engine, "connect", lambda conn, rec: conn.execute("PRAGMA foreign_keys=ON"))
-#
-# Faça isso em app/__init__.py após criar o app, verificando se o dialeto é sqlite.
-
-
-# =============================================================================
-# Notas de integridade
-# =============================================================================
-# 1) Estoque nunca negativo: garantido por regra ao aplicar StockMove.
-# 2) Preços versionados: PriceVersion registra histórico, Product guarda preço atual.
-# 3) Cancelamento de venda deve lançar StockMove de devolução em service layer.
-# 4) Auditoria: use AuditLog em alterações sensíveis via services.
-# 5) Campos money e qtd usam Decimal com quantize para evitar bugs de float.
-# 6) EAN normalizado para dígitos apenas e com validação de tamanho.

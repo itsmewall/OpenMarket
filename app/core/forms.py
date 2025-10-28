@@ -12,7 +12,7 @@ from wtforms import (
     FormField
 )
 from wtforms.validators import (
-    DataRequired, Optional as Opt, Length, NumberRange, Email
+    DataRequired, Optional as Opt, Length, NumberRange, Email, Regexp
 )
 from wtforms.widgets import HiddenInput
 
@@ -304,3 +304,29 @@ class DateRangeForm(FlaskForm):
 class SearchForm(FlaskForm):
     q = StringField("Buscar", validators=[Opt(), Length(max=120)])
     submit = SubmitField("Pesquisar")
+
+class StoreForm(FlaskForm):
+    nome = StringField("Nome da empresa", validators=[DataRequired(), Length(max=120)])
+    cnpj = StringField("CNPJ", validators=[Opt(), Length(max=18)])
+    ie = StringField("IE", validators=[Opt(), Length(max=32)])
+    uf = StringField("UF", validators=[Opt(), Length(max=2)])
+    cidade = StringField("Cidade", validators=[Opt(), Length(max=80)])
+    timezone = StringField("Timezone", validators=[DataRequired(), Length(max=40)], default="America/Sao_Paulo")
+    ativo = BooleanField("Ativa", default=True)
+    submit = SubmitField("Salvar")
+
+class UserCreateForm(FlaskForm):
+    nome = StringField("Nome", validators=[DataRequired(), Length(max=120)])
+    email = StringField("E-mail", validators=[DataRequired(), Email(), Length(max=180)])
+    role = SelectField("Perfil", choices=[("admin","Administrador"),("gerente","Gerente"),("estoquista","Estoquista"),("operador","Operador")], validators=[DataRequired()])
+    senha = PasswordField("Senha", validators=[DataRequired(), Length(min=6, max=72)])
+    ativo = BooleanField("Ativo", default=True)
+    submit = SubmitField("Criar")
+
+class UserEditForm(FlaskForm):
+    nome = StringField("Nome", validators=[DataRequired(), Length(max=120)])
+    email = StringField("E-mail", validators=[DataRequired(), Email(), Length(max=180)])
+    role = SelectField("Perfil", choices=[("admin","Administrador"),("gerente","Gerente"),("estoquista","Estoquista"),("operador","Operador")], validators=[DataRequired()])
+    nova_senha = PasswordField("Nova senha", validators=[Opt(), Length(min=6, max=72)])
+    ativo = BooleanField("Ativo", default=True)
+    submit = SubmitField("Salvar")
